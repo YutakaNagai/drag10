@@ -84,11 +84,19 @@ document.onmousedown = dragStart
 document.onmouseup = dragEnd
 
 const array = []
+let arraySum = 0
 
 for(let i = 0; i < areaLength.value; i++){
   array[i] = []
   for(let j = 0; j < areaLength.value; j++){
-    array[i][j] = Math.floor((Math.random(10) * 8) + 1)
+    let num
+    if(i === areaLength.value - 1 && j === areaLength.value - 1) {
+      num = 10 - (arraySum % 10)
+    } else {
+      num = Math.floor((Math.random(10) * 8) + 1)
+    }
+    array[i][j] = num
+    arraySum += num
   }
 }
 
