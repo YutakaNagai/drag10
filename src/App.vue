@@ -54,6 +54,9 @@ const dragEnd = (e) => {
     const card = cards[i]
     const cardRect = card.getBoundingClientRect()
 
+    // 前回の選択内容を削除
+    card.classList.remove("selected")
+
     // ドラッグの矩形内にカードが含まれているか判定
     if(cardRect.left > rect.left
       && cardRect.left + cardRect.width < rect.left + rect.width
