@@ -93,7 +93,7 @@ for(let i = 0; i < areaLength.value; i++){
     if(i === areaLength.value - 1 && j === areaLength.value - 1) {
       num = 10 - (arraySum % 10)
     } else {
-      num = Math.floor((Math.random(10) * 8) + 1)
+      num = Math.floor((Math.random(10) * 5) + 1)
     }
     array[i][j] = num
     arraySum += num
