@@ -13,18 +13,53 @@ const dragStart = (e) => {
   elem.style.left = `${left}px`
   elem.style.top = `${top}px`
   elem.style.display = "block"
-  select()
-  document.onmousemove = select
+  selectMouse()
+  document.onmousemove = selectMouse
+}
+
+// タッチ開始時の座標設定
+const touchStart = (e) => {
+  const event = e?e:window.event
+  const elem = document.getElementById("rect")
+  left = event.changedTouches[0].clientX
+  top = event.changedTouches[0].clientY
+  elem.style.left = `${left}px`
+  elem.style.top = `${top}px`
+  elem.style.display = "block"
+  selectTouch()
+  document.ontouchmove = selectTouch
 }
 
 // ドラッグ中の座標設定
-const select = (e) => {
+const selectMouse = (e) => {
   const event = e?e:window.event
   const elem = document.getElementById("rect")
 
   // X、Yの増加量を取得
   const movingLeft = event.clientX - left
   const movingTop = event.clientY - top
+
+  // 増加量が負数（左や上へのドラッグ）の場合はleft,topを修正
+  if(movingLeft < 0) {
+    elem.style.left = `${left + movingLeft}px`
+  }
+  if(movingTop < 0) {
+    elem.style.top = `${top + movingTop}px`
+  }
+
+  // 絶対値で幅と高さを設定
+  elem.style.width = `${Math.abs(movingLeft)}px`
+  elem.style.height = `${Math.abs(movingTop)}px`
+}
+
+// タッチ中の座標設定
+const selectTouch = (e) => {
+  const event = e?e:window.event
+  const elem = document.getElementById("rect")
+
+  // X、Yの増加量を取得
+  const movingLeft = event.changedTouches[0].clientX - left
+  const movingTop = event.changedTouches[0].clientY - top
 
   // 増加量が負数（左や上へのドラッグ）の場合はleft,topを修正
   if(movingLeft < 0) {
@@ -87,12 +122,20 @@ const dragEnd = (e) => {
   }
 
   document.onmousemove = null
+  document.ontouchmove = null
 }
+
 
 let left = 0
 let top = 0
+function handleTouchMove(e) {
+  e.preventDefault();
+}
+document.addEventListener('touchmove', handleTouchMove, { passive: false })
 document.onmousedown = dragStart
+document.ontouchstart = touchStart
 document.onmouseup = dragEnd
+document.ontouchend = dragEnd
 
 const array = []
 let arraySum = 0
@@ -184,7 +227,7 @@ onMounted(() => {
   background: whitesmoke;
   top: 50%;
   box-shadow: 0.5svw 0.5svw 1svw 0svw rgba(0, 0, 0, 0.3);
-  font-size: 1.5rem;
+  box-shadow: 0svw 0svw 1svw 0svw rgba(0, 0, 0, 0.3);
 }
 
 .text_block {
@@ -193,9 +236,9 @@ onMounted(() => {
 
 .erase_block {
   margin: 1svw;
-  width: 30svw;
+  width: 40%;
   height: 3.5rem;
-  border: 1svw dashed skyblue;
+  border: 0.2rem dashed skyblue;
   line-height: 3.5rem;
 }
 
