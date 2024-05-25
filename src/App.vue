@@ -76,6 +76,14 @@ const dragEnd = (e) => {
       const card = selectedCards[i]
       card.style.opacity = "0"
     }
+    erased.value += selectedCards.length
+
+    // 一度に消した枚数 - 2 をボーナスとしてスコアに加算
+    bonus.value = selectedCards.length - 2
+    score.value += selectedCards.length + bonus.value
+    window.setTimeout(() => {
+      bonus.value = 0
+    }, 2000)
   }
 
   document.onmousemove = null
@@ -109,6 +117,10 @@ const state = reactive({
 
 const size = ref(0)
 const outerRef = ref(null)
+let erased = ref(0)
+let score = ref(0)
+let bonus = ref(0)
+
 onMounted(() => {
   const outerDom = outerRef.value
   const outerRect = outerDom.getBoundingClientRect()
@@ -119,6 +131,19 @@ onMounted(() => {
 </script>
 
 <template>
+  <div class="text_block">
+    <div class="erase_block">
+      <span class="score_text">消した枚数: {{ erased }}枚</span>
+    </div>
+    <div class="score_block">
+      <span class="score_text">スコア: {{ score }}点</span>
+      <transition name="bonus">
+        <div v-if="bonus !== 0" class="bonus_text">
+          <span>同時消しボーナス +{{ bonus }}点</span>
+        </div>
+      </transition>
+    </div>
+  </div>
   <div id="outer" class="outer" ref="outerRef">
     <!-- ドラッグ時の矩形 -->
     <div id="rect"></div>
@@ -153,13 +178,71 @@ onMounted(() => {
 }
 
 .number_card {
-  border: 1px solid black;
-  /* display: inline-block; */
   display: flex;
   justify-content: center;
-  /* position: absolute; */
+  border-radius: 10%;
+  background: whitesmoke;
   top: 50%;
+  box-shadow: 0.5svw 0.5svw 1svw 0svw rgba(0, 0, 0, 0.3);
+  font-size: 1.5rem;
 }
+
+.text_block {
+  display: flex;
+}
+
+.erase_block {
+  margin: 1svw;
+  width: 30svw;
+  height: 3.5rem;
+  border: 1svw dashed skyblue;
+  line-height: 3.5rem;
+}
+
+.score_block {
+  display: flex;
+  margin: 1svw;
+  width: 50svw;
+  height: 3.5rem;
+  border: 1svw dashed skyblue;
+  line-height: 3.5rem;
+  justify-content: flex-start;
+}
+
+.score_text {
+  margin: auto 1svw;
+}
+
+.bonus_text {
+  margin: auto 1svw;
+  color: goldenrod;
+}
+
+/* 表示時の状態 */
+.bonus-enter-from {
+  opacity: 0;
+}
+/* 表示時のアクティブ状態 */
+.bonus-enter-active {
+  transition: all 1s;
+}
+/* 表示時の終了状態 */
+.bonus-enter-to {
+  opacity: 1;
+}
+/* 非表示時の状態 */
+.bonus-leave-from {
+  opacity: 1;
+}
+/* 非表示時のアクティブ状態 */
+.bonus-leave-active {
+  transition: all .5s;
+}
+/* 非表示時の終了状態 */
+.bonus-leave-to {
+  opacity: 0;
+}
+
 
 div#rect{
 display:none;
