@@ -1,5 +1,4 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
 import { ref, reactive, onMounted } from 'vue'
 
 const areaLength = ref(10)
@@ -137,20 +136,34 @@ document.ontouchstart = touchStart
 document.onmouseup = dragEnd
 document.ontouchend = dragEnd
 
+
+// カード配列の作成
 const array = []
 let arraySum = 0
 
-for(let i = 0; i < areaLength.value; i++){
-  array[i] = []
-  for(let j = 0; j < areaLength.value; j++){
-    let num
-    if(i === areaLength.value - 1 && j === areaLength.value - 1) {
-      num = 10 - (arraySum % 10)
-    } else {
-      num = Math.floor((Math.random(10) * 5) + 1)
+let arrayCheck = false
+
+while(!arrayCheck) {
+  for(let i = 0; i < areaLength.value; i++){
+    array[i] = []
+    for(let j = 0; j < areaLength.value; j++){
+      let num
+      // 最後のカードは「10 - 合計値を10で割ったあまり」で算出
+      if(i === areaLength.value - 1 && j === areaLength.value - 1) {
+        num = 10 - (arraySum % 10)
+        // 最後のカードが5以下ならカード配列作成終了
+        if(num <= 5) {
+          arrayCheck = true
+        }
+      } else {
+        // 1以上5以下の数値を各カードに設定
+        num = Math.floor((Math.random(10) * 5) + 1)
+      }
+      array[i][j] = num
+
+      // 最後のカード算出のため合計値を更新
+      arraySum += num
     }
-    array[i][j] = num
-    arraySum += num
   }
 }
 
