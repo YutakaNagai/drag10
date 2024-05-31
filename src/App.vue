@@ -187,6 +187,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <span>合計で10になるカードを囲んで消すゲーム</span>
   <div>
     <div class="text_block">
       <div class="erase_block">
