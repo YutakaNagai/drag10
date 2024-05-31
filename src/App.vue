@@ -223,31 +223,33 @@ onMounted(() => {
 
 <style scoped>
 .outer {
-  border: 3px solid burlywood;
+  border: 0.2rem solid burlywood;
   width: 80svw;
   margin: 0 auto;
   display: flex;
 }
 
 .number_card {
+  position: relative;
   display: flex;
   justify-content: center;
   border-radius: 10%;
   background: whitesmoke;
-  top: 50%;
-  box-shadow: 0.5svw 0.5svw 1svw 0svw rgba(0, 0, 0, 0.3);
-  box-shadow: 0svw 0svw 1svw 0svw rgba(0, 0, 0, 0.3);
-  margin: 0 auto;
+  top: 15%;
+  box-shadow: 0.5svw 0.5svw 1.5svw 0svw rgba(0, 0, 0, 0.3);
+  margin: auto;
 }
 
 .text_block {
   display: flex;
   height: 10vh;
+  width: 80svw;
+  margin: 0 auto;
 }
 
 .erase_block {
-  margin: 1svw;
-  width: 55%;
+  margin: 0 1%;
+  width: 50%;
   height: 3.5rem;
   border: 0.2rem dashed skyblue;
   line-height: 3.5rem;
@@ -263,8 +265,8 @@ onMounted(() => {
 }
 
 .score_block {
-  margin: 1svw;
-  width: 45%;
+  margin: 0 1%;
+  width: 40%;
   height: 3.5rem;
   border: 1svw dashed skyblue;
   line-height: 3.5rem;
