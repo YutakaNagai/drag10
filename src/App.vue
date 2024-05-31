@@ -174,17 +174,24 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="text_block">
-    <div class="erase_block">
-      <span class="score_text">消した枚数: {{ erased }}枚</span>
-    </div>
-    <div class="score_block">
-      <span class="score_text">スコア: {{ score }}点</span>
-      <transition name="bonus">
-        <div v-if="bonus !== 0" class="bonus_text">
-          <span>同時消しボーナス +{{ bonus }}点</span>
+  <div>
+    <div class="text_block">
+      <div class="erase_block">
+        <span class="erase_text">消した枚数:</span>
+        <span class="erase_value">{{ erased }}枚</span>
+      </div>
+      <div class="score_block">
+        <span class="score_text">スコア:</span>
+        <span class="score_value">{{ score }}点</span>
+        <br />
+        <div>
+          <transition name="bonus">
+            <div v-if="bonus !== 0" class="bonus_text">
+              同時消し +{{ bonus }}点
+            </div>
+          </transition>
         </div>
-      </transition>
+      </div>
     </div>
   </div>
   <div id="outer" class="outer" ref="outerRef">
@@ -204,7 +211,7 @@ onMounted(() => {
           class="number_card"
           :style="`
             width: ${size.value / 1.5}px;
-            height: ${size.value / 1.5}px`"
+            height: ${size.value / 1.5}px;`"
         >
           {{ state.array[i][j] }}
         </div>
@@ -217,7 +224,9 @@ onMounted(() => {
 <style scoped>
 .outer {
   border: 3px solid burlywood;
-  width: 90svw;
+  width: 80svw;
+  margin: 0 auto;
+  display: flex;
 }
 
 .number_card {
@@ -228,24 +237,34 @@ onMounted(() => {
   top: 50%;
   box-shadow: 0.5svw 0.5svw 1svw 0svw rgba(0, 0, 0, 0.3);
   box-shadow: 0svw 0svw 1svw 0svw rgba(0, 0, 0, 0.3);
+  margin: 0 auto;
 }
 
 .text_block {
   display: flex;
+  height: 10vh;
 }
 
 .erase_block {
   margin: 1svw;
-  width: 40%;
+  width: 55%;
   height: 3.5rem;
   border: 0.2rem dashed skyblue;
   line-height: 3.5rem;
+  text-align: left;
+}
+.erase_text {
+  margin: auto 1svw;
+  float: left;
+}
+.erase_value {
+  margin: auto 1svw;
+  float: right;
 }
 
 .score_block {
-  display: flex;
   margin: 1svw;
-  width: 50svw;
+  width: 45%;
   height: 3.5rem;
   border: 1svw dashed skyblue;
   line-height: 3.5rem;
@@ -254,28 +273,42 @@ onMounted(() => {
 
 .score_text {
   margin: auto 1svw;
+  float: left;
+}
+.score_value {
+  margin: auto 1svw;
+  float: right;
 }
 
 .bonus_text {
-  margin: auto 1svw;
+  position: relative;
+  top: -4.5rem;
+  left: 0.47rem;
+  z-index: 100;
   color: goldenrod;
 }
 
 /* 表示時の状態 */
 .bonus-enter-from {
+  position: relative;
   opacity: 0;
+  top: -3.5rem;
 }
 /* 表示時のアクティブ状態 */
 .bonus-enter-active {
-  transition: all 1s;
+  transition: all 0.5s;
 }
 /* 表示時の終了状態 */
 .bonus-enter-to {
+  position: relative;
   opacity: 1;
+  top: -4.5rem;
 }
 /* 非表示時の状態 */
 .bonus-leave-from {
+  position: relative;
   opacity: 1;
+  top: -4.5rem;
 }
 /* 非表示時のアクティブ状態 */
 .bonus-leave-active {
@@ -283,7 +316,9 @@ onMounted(() => {
 }
 /* 非表示時の終了状態 */
 .bonus-leave-to {
+  position: relative;
   opacity: 0;
+  top: -5.5rem;
 }
 
 
