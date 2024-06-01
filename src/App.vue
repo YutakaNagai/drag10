@@ -199,7 +199,7 @@ let best = ref(localStorage.getItem('best') || 0)
 let bonus = ref(0)
 
 // 制限時間の秒数
-const max_time = 30
+const max_time = 60
 // 制限時間
 let limit_time = ref(max_time)
 // 残り時間
