@@ -56,6 +56,8 @@ const selectMouse = (e) => {
   // 絶対値で幅と高さを設定
   elem.style.width = `${Math.abs(movingLeft)}px`
   elem.style.height = `${Math.abs(movingTop)}px`
+
+  isInclude()
 }
 
 // タッチ中の座標設定
@@ -78,17 +80,15 @@ const selectTouch = (e) => {
   // 絶対値で幅と高さを設定
   elem.style.width = `${Math.abs(movingLeft)}px`
   elem.style.height = `${Math.abs(movingTop)}px`
+
+  isInclude()
 }
 
-// ドラッグイベント終了
-const dragEnd = (e) => {
-  const event = e?e:window.event
+const isInclude = () => {
   const elem = document.getElementById("rect")
   const rect = elem.getBoundingClientRect()
 
   const cards = document.getElementsByClassName("number_card")
-
-  let sum = 0
 
   for(let i = 0; i < cards.length; i++){
     // 各カードの矩形範囲を取得
@@ -103,14 +103,23 @@ const dragEnd = (e) => {
       && cardRect.left + cardRect.width < rect.left + rect.width
       && cardRect.top > rect.top
       && cardRect.top + cardRect.height < rect.top + rect.height
-      && card.style.opacity !== '0'){
+      && card.style.opacity !== '0'
+    ){
         console.log('card', i, ' is include :>> ');
         card.classList.add("selected")
-        sum += Number(card.textContent)
-      }
+    }
   }
+}
+
+// ドラッグイベント終了
+const dragEnd = (e) => {
+  let sum = 0
 
   const selectedCards = document.getElementsByClassName("selected")
+
+  for (let i = 0; i < selectedCards.length; i++) {
+    sum += Number(selectedCards[i].textContent)
+  }
 
   if(sum === 10) {
     for(let i = 0; i < selectedCards.length; i++){
@@ -307,6 +316,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
+
 .progress_block {
   display: flex;
   justify-content: center;
@@ -364,6 +374,10 @@ progress {
   top: 15%;
   box-shadow: 0.5svw 0.5svw 1.5svw 0svw rgba(0, 0, 0, 0.3);
   margin: auto;
+}
+
+.selected {
+  background: #fffb79;
 }
 
 .text_block {
