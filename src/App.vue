@@ -113,31 +113,34 @@ const isInclude = () => {
 
 // ドラッグイベント終了
 const dragEnd = (e) => {
-  let sum = 0
+  if (isGaming) {
+    let sum = 0
 
-  const selectedCards = document.getElementsByClassName("selected")
+    const selectedCards = document.getElementsByClassName("selected")
 
-  for (let i = 0; i < selectedCards.length; i++) {
-    sum += Number(selectedCards[i].textContent)
-  }
-
-  if(sum === 10) {
-    for(let i = 0; i < selectedCards.length; i++){
-      const card = selectedCards[i]
-      card.style.opacity = "0"
+    for (let i = 0; i < selectedCards.length; i++) {
+      sum += Number(selectedCards[i].textContent)
     }
-    erased.value += selectedCards.length
 
-    // 一度に消した枚数 - 2 をボーナスとしてスコアに加算
-    bonus.value = selectedCards.length - 2
-    score.value += selectedCards.length + bonus.value
-    window.setTimeout(() => {
-      bonus.value = 0
-    }, 2000)
+    if(sum === 10) {
+      for(let i = 0; i < selectedCards.length; i++){
+        const card = selectedCards[i]
+        card.style.opacity = "0"
+      }
+      erased.value += selectedCards.length
+
+      // 一度に消した枚数 - 2 をボーナスとしてスコアに加算
+      bonus.value = (selectedCards.length - 2).toFixed(2)
+      remaining_time += Number(bonus.value)
+      window.setTimeout(() => {
+      remaining_time_ref.value = remaining_time
+        bonus.value = 0
+      }, 2000)
+    }
+
+    document.onmousemove = null
+    document.ontouchmove = null
   }
-
-  document.onmousemove = null
-  document.ontouchmove = null
 }
 
 
@@ -196,11 +199,12 @@ let score = ref(0)
 let bonus = ref(0)
 
 // 制限時間の秒数
-const max_time = 30
+const max_time = 5
 // 制限時間
 let limit_time = ref(max_time)
 // 残り時間
-let remaining_time = ref(max_time)
+let remaining_time = max_time
+let remaining_time_ref = ref(max_time)
 
 onMounted(() => {
   const outerDom = outerRef.value
@@ -225,8 +229,6 @@ onMounted(() => {
   // 算出したカードサイズをsvhに修正してrefに設定
   size.value = ref(cardSizeRate * 100)
 
-  let counter = remaining_time.value;
-
   // 小数点以下の桁数（1 or 2が設定可能）
   const after_dp = 2
 
@@ -240,12 +242,14 @@ onMounted(() => {
 
 
   const timerAction = setInterval(() => {
-    counter = (counter - reload_interval).toFixed(after_dp);
+    const counter = reload_interval.toFixed(after_dp);
+    remaining_time -= counter
 
     // refに反映
-    remaining_time.value = counter
-    if (counter <= 0) {
+    remaining_time_ref.value = remaining_time.toFixed(after_dp)
+    if (remaining_time <= 0) {
       clearInterval(timerAction);
+      remaining_time_ref.value = "0.00"
       isGaming = false
       document.getElementById('rect').style.display = 'none'
     }
@@ -261,8 +265,13 @@ onMounted(() => {
     <div class="progress_block">
       <span>残り時間: </span>
       <div class="progress_bar">
-        <progress id="time_limit" :max="30" :value="remaining_time"></progress>
-        <span class="countdown_text">{{ remaining_time }}秒</span>
+        <progress id="time_limit" :max="30" :value="remaining_time_ref"></progress>
+        <span class="countdown_text">{{ remaining_time_ref }}秒</span>
+        <transition name="bonus">
+          <div v-if="bonus !== 0" class="bonus_text">
+            同時消し +{{ bonus }}秒
+          </div>
+        </transition>
       </div>
     </div>
   </div>
@@ -276,14 +285,6 @@ onMounted(() => {
       <div class="score_block">
         <span class="score_text">スコア:</span>
         <span class="score_value">{{ score }}点</span>
-        <br />
-        <div>
-          <transition name="bonus">
-            <div v-if="bonus !== 0" class="bonus_text">
-              同時消し +{{ bonus }}点
-            </div>
-          </transition>
-        </div>
       </div>
     </div>
   </div>
@@ -320,6 +321,8 @@ onMounted(() => {
 .progress_block {
   display: flex;
   justify-content: center;
+  align-items: center;
+  height: 3rem;
 }
 
 progress {
@@ -423,18 +426,22 @@ progress {
 }
 
 .bonus_text {
-  position: relative;
-  top: -4.5rem;
-  left: 0.47rem;
+  position: absolute;
+  width: 9rem;
+  top: -1rem;
+  left: -4.7rem;
+  bottom: 0;
+  right: 0;
+  margin: auto;
   z-index: 100;
   color: goldenrod;
 }
 
 /* 表示時の状態 */
 .bonus-enter-from {
-  position: relative;
   opacity: 0;
-  top: -3.5rem;
+  position: absolute;
+  top: 0rem;
 }
 /* 表示時のアクティブ状態 */
 .bonus-enter-active {
@@ -442,15 +449,15 @@ progress {
 }
 /* 表示時の終了状態 */
 .bonus-enter-to {
-  position: relative;
   opacity: 1;
-  top: -4.5rem;
+  position: absolute;
+  top: -1rem;
 }
 /* 非表示時の状態 */
 .bonus-leave-from {
-  position: relative;
   opacity: 1;
-  top: -4.5rem;
+  position: absolute;
+  top: -1rem;
 }
 /* 非表示時のアクティブ状態 */
 .bonus-leave-active {
@@ -458,9 +465,9 @@ progress {
 }
 /* 非表示時の終了状態 */
 .bonus-leave-to {
-  position: relative;
   opacity: 0;
-  top: -5.5rem;
+  position: absolute;
+  top: -2rem;
 }
 
 
