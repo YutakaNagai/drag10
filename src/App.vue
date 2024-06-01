@@ -235,11 +235,11 @@ onMounted(() => {
 
   <div>
     <div class="progress_block">
-      <span>残り時間</span>
-      <progress id="time_limit" :max="30" :value="remaining_time"></progress>
-    </div>
-    <div class="countdown_block">
-      <span>{{ remaining_time }}秒</span>
+      <span>残り時間: </span>
+      <div class="progress_bar">
+        <progress id="time_limit" :max="30" :value="remaining_time"></progress>
+        <span class="countdown_text">{{ remaining_time }}秒</span>
+      </div>
     </div>
   </div>
 
@@ -292,11 +292,44 @@ onMounted(() => {
 
 <style scoped>
 .progress_block {
-  float: left;
+  display: flex;
+  justify-content: center;
 }
 
-.countdown_block {
-  float: right;
+progress {
+  width: 50svw;
+  height: 1rem;
+  border-radius: 100px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: rgb(172, 172, 172);
+}
+::-webkit-progress-bar {
+   /* プログレスバーの背景色/-webkit- 用 */
+  background-color: rgb(172, 172, 172);
+}
+::-webkit-progress-value {
+  /* プログレスバーの進捗部分色/-webkit- 用 */
+  background: rgb(34,193,195);
+  background: linear-gradient(45deg, rgba(34,193,195,1) 0%, rgba(61,204,168,1) 60%, rgba(186,253,45,1) 100%);
+}
+::-moz-progress-bar {
+  /* プログレスバーの進捗部分色/-moz- 用 */
+  background: rgb(34,193,195);
+  background: linear-gradient(45deg, rgba(34,193,195,1) 0%, rgba(61,204,168,1) 60%, rgba(186,253,45,1) 100%);
+}
+
+.progress_bar {
+  position: relative;
+}
+
+.countdown_text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  margin: auto;
 }
 
 .outer {
