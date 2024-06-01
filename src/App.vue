@@ -3,30 +3,37 @@ import { ref, reactive, onMounted } from 'vue'
 
 const areaLength = ref(10)
 
+// ゲーム中かどうか
+let isGaming = true
+
 // ドラッグ開始時の座標設定
 const dragStart = (e) => {
-  const event = e?e:window.event
-  const elem = document.getElementById("rect")
-  left = event.clientX
-  top = event.clientY
-  elem.style.left = `${left}px`
-  elem.style.top = `${top}px`
-  elem.style.display = "block"
-  selectMouse()
-  document.onmousemove = selectMouse
+  if (isGaming) {
+    const event = e?e:window.event
+    const elem = document.getElementById("rect")
+    left = event.clientX
+    top = event.clientY
+    elem.style.left = `${left}px`
+    elem.style.top = `${top}px`
+    elem.style.display = "block"
+    selectMouse()
+    document.onmousemove = selectMouse
+  }
 }
 
 // タッチ開始時の座標設定
 const touchStart = (e) => {
-  const event = e?e:window.event
-  const elem = document.getElementById("rect")
-  left = event.changedTouches[0].clientX
-  top = event.changedTouches[0].clientY
-  elem.style.left = `${left}px`
-  elem.style.top = `${top}px`
-  elem.style.display = "block"
-  selectTouch()
-  document.ontouchmove = selectTouch
+  if (isGaming) {
+    const event = e?e:window.event
+    const elem = document.getElementById("rect")
+    left = event.changedTouches[0].clientX
+    top = event.changedTouches[0].clientY
+    elem.style.left = `${left}px`
+    elem.style.top = `${top}px`
+    elem.style.display = "block"
+    selectTouch()
+    document.ontouchmove = selectTouch
+  }
 }
 
 // ドラッグ中の座標設定
@@ -127,6 +134,7 @@ const dragEnd = (e) => {
 
 let left = 0
 let top = 0
+
 function handleTouchMove(e) {
   e.preventDefault();
 }
@@ -173,21 +181,64 @@ const state = reactive({
 
 const size = ref(0)
 const outerRef = ref(null)
+// 消した数
 let erased = ref(0)
+// スコア
 let score = ref(0)
+// 同時消しボーナス
 let bonus = ref(0)
+
+// 制限時間の秒数
+const max_time = 30
+// 制限時間
+let limit_time = ref(max_time)
+// 残り時間
+let remaining_time = ref(max_time)
 
 onMounted(() => {
   const outerDom = outerRef.value
   const outerRect = outerDom.getBoundingClientRect()
 
   size.value = ref(outerRect.width / (areaLength.value + 1))
+
+  let counter = remaining_time.value;
+
+  // 小数点以下の桁数（1 or 2が設定可能）
+  const after_dp = 2
+
+  let reload_interval = 1
+  let drawing_interval = 1000
+  for (let i = 0; i < after_dp; i++) {
+    reload_interval /= 10
+    drawing_interval /= 10
+  }
+  console.log('タイマー設定: ', drawing_interval, 'ms ごとに ', reload_interval, '減少');
+
+
+  const timerAction = setInterval(() => {
+    counter = (counter - reload_interval).toFixed(after_dp);
+
+    // refに反映
+    remaining_time.value = counter
+    if (counter <= 0) {
+      clearInterval(timerAction);
+      isGaming = false
+      document.getElementById('rect').style.display = 'none'
+    }
+  }, drawing_interval);
 })
 
 </script>
 
 <template>
   <span>合計で10になるカードを囲んで消すゲーム</span>
+
+  <div>
+    <label for="time_limit">残り時間</label>
+    <progress id="time_limit" :max="30" :value="remaining_time"></progress>
+    <span>{{ remaining_time }}秒</span>
+  </div>
+
   <div>
     <div class="text_block">
       <div class="erase_block">
