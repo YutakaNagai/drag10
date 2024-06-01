@@ -333,7 +333,7 @@ onMounted(() => {
   margin: 0 1%;
   width: 40%;
   height: 3.5rem;
-  border: 1svw dashed skyblue;
+  border: 0.2rem dashed skyblue;
   line-height: 3.5rem;
   justify-content: flex-start;
 }
