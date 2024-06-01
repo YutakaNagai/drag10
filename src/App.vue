@@ -1,5 +1,45 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { supabase } from './supabase'
+import CONST from './utils/consts'
+
+let user_name = ref('')
+
+const changeName = (event) => {
+  console.log('event :>> ', event);
+  user_name.value =
+    `${CONST.name1[Math.floor(Math.random() * CONST.name1.length)]} ${CONST.name2[Math.floor(Math.random() * CONST.name2.length)]}`
+  localStorage.setItem('user_name', user_name.value)
+}
+
+const local_name = localStorage.getItem('user_name')
+if(local_name){
+  user_name.value = local_name
+} else {
+  changeName()
+}
+
+const records = ref([]);
+const record = ref('');
+
+const getRecords = async () => {
+  let { data, error, status } = await supabase
+    .from('surround_card_scores')
+    .select('user_name, score')
+    .order('score', {ascending: false})
+    .limit(5);
+  records.value = data;
+};
+
+getRecords()
+
+const addRecord = async (user_name, score) => {
+  const { data, error } = await supabase
+    .from('surround_card_scores')
+    .insert([{ user_name, score}]);
+};
+
+console.log('records.value :>> ', records.value);
 
 const areaLength = ref(10)
 
@@ -10,6 +50,7 @@ let isGaming = true
 const dragStart = (e) => {
   if (isGaming) {
     const event = e?e:window.event
+    console.log('event :>> ', event);
     const elem = document.getElementById("rect")
     left = event.clientX
     top = event.clientY
@@ -252,6 +293,12 @@ onMounted(() => {
       remaining_time_ref.value = "0.00"
       isGaming = false
       document.getElementById('rect').style.display = 'none'
+
+      // DBにレコード追加
+      addRecord(user_name.value, erased.value)
+      console.log('スコア登録完了 :>>\nuser_name: ', user_name.value, '\nscore: ', erased.value);
+
+      // ローカルの最高記録更新
       const bestHistory = Number(localStorage.getItem('best'))
       if(bestHistory < erased.value) {
         best.value = erased.value
@@ -265,12 +312,16 @@ onMounted(() => {
 
 <template>
   <span>合計で10になるカードを囲んで消すゲーム</span>
+  <div>
+    <span>名前: {{ user_name }}</span>　
+    <!-- <button style="z-index: 101" @click="console.log('aaaaaaaaaaa')">改名！</button> -->
+  </div>
 
   <div>
     <div class="progress_block">
       <span>残り時間: </span>
       <div class="progress_bar">
-        <progress id="time_limit" :max="30" :value="remaining_time_ref"></progress>
+        <progress id="time_limit" :max="limit_time" :value="remaining_time_ref"></progress>
         <span class="countdown_text">{{ remaining_time_ref }}秒</span>
         <transition name="bonus">
           <div v-if="bonus !== 0" class="bonus_text">
@@ -317,6 +368,26 @@ onMounted(() => {
         </div>
       </div>
       <br />
+    </div>
+  </div>
+
+  <hr />
+
+  <div>
+    <div>ランキング</div>
+    <div class="ranking">
+      <table >
+        <tr>
+          <th>順位</th>
+          <th>名前</th>
+          <th>スコア</th>
+        </tr>
+        <tr v-for="(record, index) in records" :key="record.id">
+          <td>{{ index+1 }}位</td>
+          <td>{{ record.user_name }}</td>
+          <td>{{ record.score }}</td>
+        </tr>
+      </table>
     </div>
   </div>
 </template>
@@ -473,6 +544,11 @@ progress {
   opacity: 0;
   position: absolute;
   top: -2rem;
+}
+
+.ranking {
+  display: flex;
+  justify-content: center;
 }
 
 
