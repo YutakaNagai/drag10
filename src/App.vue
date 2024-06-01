@@ -194,12 +194,12 @@ const outerRef = ref(null)
 // 消した数
 let erased = ref(0)
 // スコア
-let score = ref(0)
+let best = ref(localStorage.getItem('best') || 0)
 // 同時消しボーナス
 let bonus = ref(0)
 
 // 制限時間の秒数
-const max_time = 5
+const max_time = 30
 // 制限時間
 let limit_time = ref(max_time)
 // 残り時間
@@ -252,6 +252,11 @@ onMounted(() => {
       remaining_time_ref.value = "0.00"
       isGaming = false
       document.getElementById('rect').style.display = 'none'
+      const bestHistory = Number(localStorage.getItem('best'))
+      if(bestHistory < erased.value) {
+        best.value = erased.value
+        localStorage.setItem('best', erased.value)
+      }
     }
   }, drawing_interval);
 })
@@ -283,8 +288,8 @@ onMounted(() => {
         <span class="erase_value">{{ erased }}枚</span>
       </div>
       <div class="score_block">
-        <span class="score_text">スコア:</span>
-        <span class="score_value">{{ score }}点</span>
+        <span class="score_text">最高記録:</span>
+        <span class="score_value">{{ best }}枚</span>
       </div>
     </div>
   </div>
