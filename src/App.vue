@@ -234,9 +234,13 @@ onMounted(() => {
   <span>合計で10になるカードを囲んで消すゲーム</span>
 
   <div>
-    <label for="time_limit">残り時間</label>
-    <progress id="time_limit" :max="30" :value="remaining_time"></progress>
-    <span>{{ remaining_time }}秒</span>
+    <div class="progress_block">
+      <span>残り時間</span>
+      <progress id="time_limit" :max="30" :value="remaining_time"></progress>
+    </div>
+    <div class="countdown_block">
+      <span>{{ remaining_time }}秒</span>
+    </div>
   </div>
 
   <div>
@@ -287,6 +291,14 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.progress_block {
+  float: left;
+}
+
+.countdown_block {
+  float: right;
+}
+
 .outer {
   border: 0.2rem solid burlywood;
   width: 80svw;
