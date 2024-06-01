@@ -149,31 +149,29 @@ document.ontouchend = dragEnd
 const array = []
 let arraySum = 0
 
-let arrayCheck = false
-
-while(!arrayCheck) {
-  for(let i = 0; i < areaLength.value; i++){
-    array[i] = []
-    for(let j = 0; j < areaLength.value; j++){
-      let num
-      // 最後のカードは「10 - 合計値を10で割ったあまり」で算出
-      if(i === areaLength.value - 1 && j === areaLength.value - 1) {
-        num = 10 - (arraySum % 10)
-        // 最後のカードが5以下ならカード配列作成終了
-        if(num <= 5) {
-          arrayCheck = true
-        }
-      } else {
-        // 1以上5以下の数値を各カードに設定
-        num = Math.floor((Math.random(10) * 5) + 1)
+for(let i = 0; i < areaLength.value; i++){
+  array[i] = []
+  for(let j = 0; j < areaLength.value; j++){
+    let num
+    // 最後のカードは「10 - 合計値を10で割ったあまり」で算出
+    if(i === areaLength.value - 1 && j === areaLength.value - 1) {
+      num = 10 - (arraySum % 10)
+      // 最後のカードが6以上の場合、1個前からやり直し
+      if(num > 5){
+        arraySum = arraySum - (array[i][j] || 0) - array[i][j-1]
+        j = 8
       }
-      array[i][j] = num
-
-      // 最後のカード算出のため合計値を更新
-      arraySum += num
+    } else {
+      // 1以上5以下の数値を各カードに設定
+      num = Math.floor((Math.random(10) * 5) + 1)
     }
+    array[i][j] = num
+
+    // 最後のカード算出のため合計値を更新
+    arraySum += num
   }
 }
+console.log('全カードの合計 :>> ', arraySum);
 
 const state = reactive({
   array,
