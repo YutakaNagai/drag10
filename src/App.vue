@@ -197,7 +197,24 @@ onMounted(() => {
   const outerDom = outerRef.value
   const outerRect = outerDom.getBoundingClientRect()
 
-  size.value = ref(outerRect.width / (areaLength.value + 1))
+
+  // 画面の縦横を取得
+  const displayWidthPx = window.innerWidth
+  const displayHeightPx = window.innerHeight
+
+  let cardSizeRate
+  if (displayWidthPx < displayHeightPx) {
+    // 画面が縦長の場合
+    const sizePx = outerRect.width / (areaLength.value + 1)
+    cardSizeRate = sizePx / displayWidthPx
+  } else {
+    // 画面が横長の場合
+    const sizePx = outerRect.height * 10 / (areaLength.value + 1)
+    cardSizeRate = sizePx / displayHeightPx
+  }
+
+  // 算出したカードサイズをsvhに修正してrefに設定
+  size.value = ref(cardSizeRate * 100)
 
   let counter = remaining_time.value;
 
@@ -269,16 +286,17 @@ onMounted(() => {
         :key="j"
         :style="`
           display: inline-block;
-          left: ${size.value * j}px;
-          top: ${size.value * i}px;
-          width: ${size.value}px;
-          height: ${size.value}px;`"
+          left: ${size.value * j}svw;
+          top: ${size.value * i}svw;
+          width: ${size.value}svw;
+          height: ${size.value}svw;`"
       >
         <div
           class="number_card"
           :style="`
-            width: ${size.value / 1.5}px;
-            height: ${size.value / 1.5}px;`"
+            width: ${size.value / 1.5}svw;
+            height: ${size.value / 1.5}svw;
+            font-size: ${size.value * 0.6}svw`"
         >
           {{ state.array[i][j] }}
         </div>
