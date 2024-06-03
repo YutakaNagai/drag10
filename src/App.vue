@@ -306,6 +306,7 @@ const gameEnd = () => {
   document.removeEventListener('touchend', dragEnd)
 
   getRecords()
+  document.removeEventListener('touchmove', handleTouchMove)
 }
 
 const gameTimer = () => {
