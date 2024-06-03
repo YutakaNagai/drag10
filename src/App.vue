@@ -186,11 +186,6 @@ const dragEnd = (e) => {
 let left = 0
 let top = 0
 
-function handleTouchMove(e) {
-  e.preventDefault();
-}
-document.addEventListener('touchmove', handleTouchMove, { passive: false })
-
 
 // カード配列の作成
 const array = []

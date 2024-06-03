@@ -30,15 +30,6 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background: #ffffff;
-
-  /* ドラッグ禁止 */
-  /* user-select:none;
-  -webkit-user-select:none;
-  -ms-user-select: none;
-  -moz-user-select:none;
-  -khtml-user-select:none; */
-  -webkit-user-drag:none;
-  -khtml-user-drag:none;
 }
 
 h1 {
