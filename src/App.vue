@@ -312,68 +312,72 @@ onMounted(() => {
 
 <template>
   <span>合計で10になるカードを囲んで消すゲーム</span>
-  <div>
-    <span>名前: {{ user_name }}</span>　
-    <!-- <button style="z-index: 101" @click="console.log('aaaaaaaaaaa')">改名！</button> -->
-  </div>
-
-  <div>
-    <div class="progress_block">
-      <span>残り時間: </span>
-      <div class="progress_bar">
-        <progress id="time_limit" :max="limit_time" :value="remaining_time_ref"></progress>
-        <span class="countdown_text">{{ remaining_time_ref }}秒</span>
-        <transition name="bonus">
-          <div v-if="bonus !== 0" class="bonus_text">
-            同時消し +{{ bonus }}秒
-          </div>
-        </transition>
-      </div>
+  <div class="bg_card">
+    <div>
+      <span>名前: {{ user_name }}</span>　
+      <!-- <button style="z-index: 101" @click="console.log('aaaaaaaaaaa')">改名！</button> -->
     </div>
-  </div>
 
-  <div>
-    <div class="text_block">
-      <div class="erase_block">
-        <span class="erase_text">消した枚数:</span>
-        <span class="erase_value">{{ erased }}枚</span>
-      </div>
-      <div class="score_block">
-        <span class="score_text">最高記録:</span>
-        <span class="score_value">{{ best }}枚</span>
-      </div>
-    </div>
-  </div>
-  <div id="outer" class="outer" ref="outerRef">
-    <!-- ドラッグ時の矩形 -->
-    <div id="rect"></div>
-    <div v-for="(iValue, i) in state.array" :key="i">
-      <div v-for="(jValue, j) in state.array[i]"
-        :key="j"
-        :style="`
-          display: inline-block;
-          left: ${size.value * j}svw;
-          top: ${size.value * i}svw;
-          width: ${size.value}svw;
-          height: ${size.value}svw;`"
-      >
-        <div
-          class="number_card"
-          :style="`
-            width: ${size.value / 1.5}svw;
-            height: ${size.value / 1.5}svw;
-            font-size: ${size.value * 0.6}svw`"
-        >
-          {{ state.array[i][j] }}
+    <div>
+      <div class="progress_block">
+        <span>残り時間: </span>
+        <div class="progress_bar">
+          <progress id="time_limit" :max="limit_time" :value="remaining_time_ref"></progress>
+          <span class="countdown_text">{{ remaining_time_ref }}秒</span>
+          <transition name="bonus">
+            <div v-if="bonus !== 0" class="bonus_text">
+              同時消し +{{ bonus }}秒
+            </div>
+          </transition>
         </div>
       </div>
-      <br />
+    </div>
+
+    <div>
+      <div class="text_block">
+        <div class="erase_block">
+          <!-- <span class="erase_text">消した枚数:</span> -->
+          <img src="./assets/erased.png" class="score_icon" />
+          <span class="erase_value">{{ erased }}枚</span>
+        </div>
+        <div class="score_block">
+          <!-- <span class="score_text">最高記録:</span> -->
+          <img src="./assets/record.png" class="score_icon" />
+          <span class="score_value">{{ best }}枚</span>
+        </div>
+      </div>
+    </div>
+    <div id="outer" class="outer" ref="outerRef">
+      <!-- ドラッグ時の矩形 -->
+      <div id="rect"></div>
+      <div v-for="(iValue, i) in state.array" :key="i">
+        <div v-for="(jValue, j) in state.array[i]"
+          :key="j"
+          :style="`
+            display: inline-block;
+            left: ${size.value * j}svw;
+            top: ${size.value * i}svw;
+            width: ${size.value}svw;
+            height: ${size.value}svw;`"
+        >
+          <div
+            class="number_card"
+            :style="`
+              width: ${size.value / 1.5}svw;
+              height: ${size.value / 1.5}svw;
+              font-size: ${size.value * 0.6}svw`"
+          >
+            {{ state.array[i][j] }}
+          </div>
+        </div>
+        <br />
+      </div>
     </div>
   </div>
 
   <hr />
 
-  <div>
+  <div class="bg_card">
     <div>ランキング</div>
     <div class="ranking">
       <table >
@@ -393,6 +397,13 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.bg_card {
+  background: whitesmoke;
+  padding: 1rem;
+  border-radius: 2rem;
+  box-shadow: 1svw 1svw 1.5svw 0svw rgba(0, 0, 0, 0.3);
+  background: #C9D4CC;
+}
 
 .progress_block {
   display: flex;
@@ -438,10 +449,15 @@ progress {
 }
 
 .outer {
-  border: 0.2rem solid burlywood;
+  /* border: 0.2rem solid burlywood; */
   width: 80svw;
   margin: 0 auto;
   display: flex;
+}
+
+.score_icon {
+  width: 3rem;
+  vertical-align: middle;
 }
 
 .number_card {
@@ -449,14 +465,14 @@ progress {
   display: flex;
   justify-content: center;
   border-radius: 10%;
-  background: whitesmoke;
+  background: #ffffff;
   top: 15%;
   box-shadow: 0.5svw 0.5svw 1.5svw 0svw rgba(0, 0, 0, 0.3);
   margin: auto;
 }
 
 .selected {
-  background: #fffb79;
+  background: #f7c6bd;
 }
 
 .text_block {
@@ -470,7 +486,7 @@ progress {
   margin: 0 1%;
   width: 50%;
   height: 3.5rem;
-  border: 0.2rem dashed skyblue;
+  border: 0.2rem dashed #c2ffbd;
   line-height: 3.5rem;
   text-align: left;
 }
@@ -487,7 +503,7 @@ progress {
   margin: 0 1%;
   width: 40%;
   height: 3.5rem;
-  border: 0.2rem dashed skyblue;
+  border: 0.2rem dashed #c2ffbd;
   line-height: 3.5rem;
   justify-content: flex-start;
 }
