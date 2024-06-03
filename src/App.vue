@@ -186,6 +186,10 @@ const dragEnd = (e) => {
 let left = 0
 let top = 0
 
+function handleTouchMove(e) {
+  e.preventDefault();
+}
+
 
 // カード配列の作成
 const array = []
@@ -270,6 +274,8 @@ const gameStart = () => {
 // 残り時間
   remaining_time = max_time
   remaining_time_ref.value = max_time
+
+  document.addEventListener('touchmove', handleTouchMove, { passive: false })
 
 
   document.addEventListener('mousedown', dragStart)
