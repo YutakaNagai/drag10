@@ -244,26 +244,33 @@ const createCards = () => {
   for(let i = 0; i < areaLength.value; i++){
     array[i] = []
     for(let j = 0; j < areaLength.value; j++){
-      let num
-      // 最後のカードは「10 - 合計値を10で割ったあまり」で算出
-      if(i === areaLength.value - 1 && j === areaLength.value - 1) {
-        num = 10 - (arraySum % 10)
-        // 最後のカードが6以上の場合、1個前からやり直し
-        if(num > 5){
-          arraySum = arraySum - (array[i][j] || 0) - array[i][j-1]
-          j = 8
-        }
-      } else {
-        // 1以上5以下の数値を各カードに設定
-        num = Math.floor((Math.random(10) * 5) + 1)
-      }
-      array[i][j] = num
+      let cardNum = Math.floor((Math.random(10) * 5) + 1)
+      // 1以上5以下の数値を各カードに設定
+      array[i][j] = cardNum
 
-      // 最後のカード算出のため合計値を更新
-      arraySum += num
+      // 10で割り切れるようにするため合計値を更新
+      arraySum += cardNum
     }
   }
+
+  let surplus = arraySum % 10
   console.log('全カードの合計 :>> ', arraySum);
+  console.log('10で割った際の余り :>> ', surplus);
+
+  // 合計が10で割り切れない場合、ランダムなカードの値を剰余数分小さくする
+  if (surplus > 1) {
+    while(surplus !== 0) {
+      let rand_i = Math.floor((Math.random() * 10))
+      let rand_j = Math.floor((Math.random() * 10))
+      if (array[rand_i][rand_j] > 1) {
+        console.log('array[', rand_i, '][', rand_j, '] :>> ', array[rand_i][rand_j], 'から', array[rand_i][rand_j] - 1, 'に変更');
+        array[rand_i][rand_j]--
+        surplus--
+        arraySum--
+      }
+    }
+  }
+  console.log('最終的な全カードの合計 :>> ', arraySum);
 }
 
 
