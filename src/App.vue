@@ -64,10 +64,11 @@ const getRecords = async () => {
 
   let { data, error, status } = await supabase
     .from('surround_card_scores')
-    .select('user_name, score, created_at')
+    .select('user_name, score, created_at, clear_time')
     .gte('created_at', startDate)
     .lte('created_at', endDate)
     .order('score', {ascending: false})
+    .order('clear_time', {ascending: false})
     .order('created_at', {ascending: false})
     .limit(10);
   state.records = data;
@@ -78,10 +79,10 @@ let ranking_term = ref('daily')
 
 getRecords()
 
-const addRecord = async (user_name, score) => {
+const addRecord = async (user_name, score, clear_time) => {
   const { data, error } = await supabase
     .from('surround_card_scores')
-    .insert([{ user_name, score}]);
+    .insert([{ user_name, score, clear_time}]);
 };
 
 const areaLength = ref(10)
@@ -377,14 +378,20 @@ const gameTimer = () => {
 
       // refに反映
       remaining_time_ref.value = remaining_time.toFixed(after_dp)
-      if (remaining_time <= 0) {
+      if (remaining_time <= 0 || erased.value === 100) {
+        // タイムアップ or 全消し時の処理
         clearInterval(timerAction);
         remaining_time_ref.value = "0.00"
         document.getElementById('rect').style.display = 'none'
 
+        let clear_time = '×'
+        if (erased.value === 100) {
+          clear_time = remaining_time
+        }
+
         // DBにレコード追加
-        addRecord(user_name.value, erased.value)
-        console.log('スコア登録完了 :>>\nuser_name: ', user_name.value, '\nscore: ', erased.value);
+        addRecord(user_name.value, erased.value, remaining_time)
+        console.log('スコア登録完了 :>>\nuser_name: ', user_name.value, '\nscore: ', erased.value, '\nクリアタイム: ', clear_time);
 
         // ローカルの最高記録更新
         const bestHistory = Number(localStorage.getItem('best'))
@@ -496,11 +503,13 @@ const changeRanking = async (term) => {
           <th>順位</th>
           <th>名前</th>
           <th>スコア</th>
+          <th>残タイム</th>
         </tr>
         <tr v-for="(record, index) in state.records" :key="record.id">
           <td>{{ index+1 }}</td>
           <td>{{ record.user_name }}</td>
           <td>{{ record.score }}</td>
+          <td>{{ record.clear_time }}</td>
         </tr>
       </table>
     </div>
