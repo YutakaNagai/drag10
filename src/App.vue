@@ -6,7 +6,6 @@ import CONST from './utils/consts'
 let user_name = ref('')
 
 const changeName = (event) => {
-  console.log('event :>> ', event);
   user_name.value =
     `${CONST.name1[Math.floor(Math.random() * CONST.name1.length)]} ${CONST.name2[Math.floor(Math.random() * CONST.name2.length)]}`
   localStorage.setItem('user_name', user_name.value)
@@ -44,13 +43,12 @@ console.log('records.value :>> ', records.value);
 const areaLength = ref(10)
 
 // ゲーム中かどうか
-let isGaming = true
+let isGaming = ref(false)
 
 // ドラッグ開始時の座標設定
 const dragStart = (e) => {
-  if (isGaming) {
+  if (isGaming.value) {
     const event = e?e:window.event
-    console.log('event :>> ', event);
     const elem = document.getElementById("rect")
     left = event.clientX
     top = event.clientY
@@ -64,7 +62,7 @@ const dragStart = (e) => {
 
 // タッチ開始時の座標設定
 const touchStart = (e) => {
-  if (isGaming) {
+  if (isGaming.value) {
     const event = e?e:window.event
     const elem = document.getElementById("rect")
     left = event.changedTouches[0].clientX
@@ -154,7 +152,7 @@ const isInclude = () => {
 
 // ドラッグイベント終了
 const dragEnd = (e) => {
-  if (isGaming) {
+  if (isGaming.value) {
     let sum = 0
 
     const selectedCards = document.getElementsByClassName("selected")
@@ -192,10 +190,6 @@ function handleTouchMove(e) {
   e.preventDefault();
 }
 document.addEventListener('touchmove', handleTouchMove, { passive: false })
-document.onmousedown = dragStart
-document.ontouchstart = touchStart
-document.onmouseup = dragEnd
-document.ontouchend = dragEnd
 
 
 // カード配列の作成
@@ -234,7 +228,7 @@ const size = ref(0)
 const outerRef = ref(null)
 // 消した数
 let erased = ref(0)
-// スコア
+// ローカルの最高記録
 let best = ref(localStorage.getItem('best') || 0)
 // 同時消しボーナス
 let bonus = ref(0)
@@ -269,7 +263,51 @@ onMounted(() => {
 
   // 算出したカードサイズをsvhに修正してrefに設定
   size.value = ref(cardSizeRate * 100)
+})
 
+const isCounting = ref(false)
+const before_game_countdown = ref(3)
+
+const gameStart = () => {
+  // ゲームのリセット処理
+  erased.value = 0
+  limit_time.value = max_time
+// 残り時間
+  remaining_time = max_time
+  remaining_time_ref.value = max_time
+
+
+  document.addEventListener('mousedown', dragStart)
+  document.addEventListener('touchstart', touchStart)
+  document.addEventListener('mouseup', dragEnd)
+  document.addEventListener('touchend', dragEnd)
+
+  // ゲーム開始前のカウントダウン
+  isCounting.value = true
+  const countdown_interval = setInterval(() => {
+    before_game_countdown.value = Number(before_game_countdown.value) - 1
+    if(before_game_countdown.value === 0) {
+      clearInterval(countdown_interval);
+      isGaming.value = true
+      gameTimer()
+      before_game_countdown.value = 3
+      isCounting.value = false
+    }
+  }, 1000);
+}
+
+const gameEnd = () => {
+  isGaming.value = false
+
+  document.removeEventListener('mousedown', dragStart)
+  document.removeEventListener('touchstart', touchStart)
+  document.removeEventListener('mouseup', dragEnd)
+  document.removeEventListener('touchend', dragEnd)
+
+  getRecords()
+}
+
+const gameTimer = () => {
   // 小数点以下の桁数（1 or 2が設定可能）
   const after_dp = 2
 
@@ -281,41 +319,43 @@ onMounted(() => {
   }
   console.log('タイマー設定: ', drawing_interval, 'ms ごとに ', reload_interval, '減少');
 
+  if(isGaming.value){
+    const timerAction = setInterval(() => {
+      const counter = reload_interval.toFixed(after_dp);
+      remaining_time -= counter
 
-  const timerAction = setInterval(() => {
-    const counter = reload_interval.toFixed(after_dp);
-    remaining_time -= counter
+      // refに反映
+      remaining_time_ref.value = remaining_time.toFixed(after_dp)
+      if (remaining_time <= 0) {
+        clearInterval(timerAction);
+        remaining_time_ref.value = "0.00"
+        document.getElementById('rect').style.display = 'none'
 
-    // refに反映
-    remaining_time_ref.value = remaining_time.toFixed(after_dp)
-    if (remaining_time <= 0) {
-      clearInterval(timerAction);
-      remaining_time_ref.value = "0.00"
-      isGaming = false
-      document.getElementById('rect').style.display = 'none'
+        // DBにレコード追加
+        addRecord(user_name.value, erased.value)
+        console.log('スコア登録完了 :>>\nuser_name: ', user_name.value, '\nscore: ', erased.value);
 
-      // DBにレコード追加
-      addRecord(user_name.value, erased.value)
-      console.log('スコア登録完了 :>>\nuser_name: ', user_name.value, '\nscore: ', erased.value);
+        // ローカルの最高記録更新
+        const bestHistory = Number(localStorage.getItem('best'))
+        if(bestHistory < erased.value) {
+          best.value = erased.value
+          localStorage.setItem('best', erased.value)
+        }
 
-      // ローカルの最高記録更新
-      const bestHistory = Number(localStorage.getItem('best'))
-      if(bestHistory < erased.value) {
-        best.value = erased.value
-        localStorage.setItem('best', erased.value)
+        gameEnd()
       }
-    }
-  }, drawing_interval);
-})
+    }, drawing_interval);
+  }
+}
 
 </script>
 
 <template>
   <span>合計で10になるカードを囲んで消すゲーム</span>
   <div class="bg_card">
-    <div>
-      <span>名前: {{ user_name }}</span>　
-      <!-- <button style="z-index: 101" @click="console.log('aaaaaaaaaaa')">改名！</button> -->
+    <div class="name_block">
+      <span class="user_name">名前: {{ user_name }}</span>　
+      <button class="rename_btn" v-show="!isCounting && !isGaming" style="z-index: 101" @click="changeName()">改名！</button>
     </div>
 
     <div>
@@ -348,30 +388,38 @@ onMounted(() => {
       </div>
     </div>
     <div id="outer" class="outer" ref="outerRef">
-      <!-- ドラッグ時の矩形 -->
-      <div id="rect"></div>
-      <div v-for="(iValue, i) in state.array" :key="i">
-        <div v-for="(jValue, j) in state.array[i]"
-          :key="j"
-          :style="`
-            display: inline-block;
-            left: ${size.value * j}svw;
-            top: ${size.value * i}svw;
-            width: ${size.value}svw;
-            height: ${size.value}svw;`"
-        >
-          <div
-            class="number_card"
-            :style="`
-              width: ${size.value / 1.5}svw;
-              height: ${size.value / 1.5}svw;
-              font-size: ${size.value * 0.6}svw`"
-          >
-            {{ state.array[i][j] }}
-          </div>
+      <template v-if="!isGaming">
+        <div class="before_game">
+          <button v-if="!isCounting" @click="gameStart()">Start!</button>
+          <div v-else class="before_game_countdown">{{ before_game_countdown }}</div>
         </div>
-        <br />
-      </div>
+      </template>
+      <template v-else>
+        <!-- ドラッグ時の矩形 -->
+        <div id="rect"></div>
+        <div v-for="(iValue, i) in state.array" :key="i">
+          <div v-for="(jValue, j) in state.array[i]"
+            :key="j"
+            :style="`
+              display: inline-block;
+              left: ${size.value * j}svw;
+              top: ${size.value * i}svw;
+              width: ${size.value}svw;
+              height: ${size.value}svw;`"
+          >
+            <div
+              class="number_card"
+              :style="`
+                width: ${size.value / 1.5}svw;
+                height: ${size.value / 1.5}svw;
+                font-size: ${size.value * 0.6}svw`"
+            >
+              {{ state.array[i][j] }}
+            </div>
+          </div>
+          <br />
+        </div>
+      </template>
     </div>
   </div>
 
@@ -403,6 +451,21 @@ onMounted(() => {
   border-radius: 2rem;
   box-shadow: 1svw 1svw 1.5svw 0svw rgba(0, 0, 0, 0.3);
   background: #C9D4CC;
+}
+
+.name_block {
+  display: flex;
+  width: 100%;
+  height: 2.5rem;
+  align-items: center;
+}
+
+.user_name {
+  margin: auto auto auto 0;
+}
+
+.rename_btn {
+  margin: auto 0 auto auto;
 }
 
 .progress_block {
@@ -451,8 +514,18 @@ progress {
 .outer {
   /* border: 0.2rem solid burlywood; */
   width: 80svw;
+  height: 80svw;
   margin: 0 auto;
   display: flex;
+}
+
+.before_game {
+  margin: auto;
+}
+
+.before_game_countdown {
+  color: #CC3030;
+  font-size: 10rem;
 }
 
 .score_icon {
