@@ -18,17 +18,63 @@ if(local_name){
   changeName()
 }
 
-const records = ref([]);
-const record = ref('');
-
 const getRecords = async () => {
+  const formatDate = (date) => {
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth() + 1;
+    const day = date.getUTCDate();
+    const dateStr =
+      year +
+      "-" +
+      String(month).padStart(2, "0") +
+      "-" +
+      String(day).padStart(2, "0")
+    return dateStr
+  }
+
+  const today = new Date()
+
+  let startDate
+  let endDate = `${formatDate(today)} 14:59:59`
+
+  if(ranking_term.value === 'daily') {
+    // デイリーランキング
+    const yesterday = new Date(today.getTime())
+    yesterday.setDate(yesterday.getDate() - 1)
+
+    startDate = formatDate(yesterday)
+  } else if (ranking_term.value === 'weekly') {
+    // ウィークリーランキング
+    const lastWeek = new Date(today.getTime())
+    lastWeek.setDate(lastWeek.getDate() - 7)
+
+    startDate = formatDate(lastWeek)
+  } else if (ranking_term.value === 'monthly') {
+    // マンスリーランキング
+    const month = new Date(today.getTime())
+    month.setMonth(month.getMonth() - 1)
+
+    startDate = formatDate(month)
+  } else {
+    // トータルランキング
+    startDate = formatDate(new Date(0))
+  }
+
+  startDate += " 15:00:00"
+
   let { data, error, status } = await supabase
     .from('surround_card_scores')
-    .select('user_name, score')
+    .select('user_name, score, created_at')
+    .gte('created_at', startDate)
+    .lte('created_at', endDate)
     .order('score', {ascending: false})
-    .limit(5);
-  records.value = data;
+    .order('created_at', {ascending: false})
+    .limit(10);
+  state.records = data;
 };
+
+// 画面表示時のランキング期間
+let ranking_term = ref('daily')
 
 getRecords()
 
@@ -37,8 +83,6 @@ const addRecord = async (user_name, score) => {
     .from('surround_card_scores')
     .insert([{ user_name, score}]);
 };
-
-console.log('records.value :>> ', records.value);
 
 const areaLength = ref(10)
 
@@ -221,6 +265,7 @@ console.log('全カードの合計 :>> ', arraySum);
 
 const state = reactive({
   array,
+  records: [],
 })
 
 const size = ref(0)
@@ -269,9 +314,10 @@ const before_game_countdown = ref(3)
 
 const gameStart = () => {
   // ゲームのリセット処理
+  // TODO: ゲーム開始時に画面をTOPに戻したい
   erased.value = 0
   limit_time.value = max_time
-// 残り時間
+  // 残り時間
   remaining_time = max_time
   remaining_time_ref.value = max_time
 
@@ -348,6 +394,13 @@ const gameTimer = () => {
       }
     }, drawing_interval);
   }
+}
+
+// 表示ランキングの変更
+const changeRanking = async (term) => {
+  ranking_term.value = term
+
+  getRecords()
 }
 
 </script>
@@ -429,15 +482,20 @@ const gameTimer = () => {
 
   <div class="bg_card">
     <div>ランキング</div>
+    <div class="ranking_terms">
+      <span :class="ranking_term === 'daily' ? 'now_ranking' : ''" @click="changeRanking('daily')">今日</span>
+      <span :class="ranking_term === 'weekly' ? 'now_ranking' : ''" @click="changeRanking('weekly')">今週</span>
+      <span :class="ranking_term === 'total' ? 'now_ranking' : ''" @click="changeRanking('total')">全期間</span>
+    </div>
     <div class="ranking">
-      <table >
+      <table>
         <tr>
           <th>順位</th>
           <th>名前</th>
           <th>スコア</th>
         </tr>
-        <tr v-for="(record, index) in records" :key="record.id">
-          <td>{{ index+1 }}位</td>
+        <tr v-for="(record, index) in state.records" :key="record.id">
+          <td>{{ index+1 }}</td>
           <td>{{ record.user_name }}</td>
           <td>{{ record.score }}</td>
         </tr>
@@ -640,6 +698,20 @@ progress {
 .ranking {
   display: flex;
   justify-content: center;
+  font-size: 1rem;
+}
+
+.ranking_terms {
+  display: flex;
+  justify-content: space-around;
+  padding: 0rem 1rem;
+  font-size: small;
+}
+
+.now_ranking {
+  color: #f5a500;
+  font-weight: bold;
+  border-bottom: double #f5a500;
 }
 
 
