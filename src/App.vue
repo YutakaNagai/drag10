@@ -388,7 +388,7 @@ const gameTimer = () => {
         remaining_time_ref.value = "0.00"
         document.getElementById('rect').style.display = 'none'
 
-        let clear_time = '×'
+        let clear_time = null
         if (erased.value === 100) {
           clear_time = remaining_time
         }
@@ -513,7 +513,7 @@ const changeRanking = async (term) => {
           <td>{{ index+1 }}</td>
           <td>{{ record.user_name }}</td>
           <td>{{ record.score }}</td>
-          <td>{{ record.clear_time }}</td>
+          <td>{{ record.clear_time || '×' }}</td>
         </tr>
       </table>
     </div>
