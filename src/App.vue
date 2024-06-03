@@ -235,34 +235,37 @@ function handleTouchMove(e) {
   e.preventDefault();
 }
 
-
-// カード配列の作成
 const array = []
-let arraySum = 0
 
-for(let i = 0; i < areaLength.value; i++){
-  array[i] = []
-  for(let j = 0; j < areaLength.value; j++){
-    let num
-    // 最後のカードは「10 - 合計値を10で割ったあまり」で算出
-    if(i === areaLength.value - 1 && j === areaLength.value - 1) {
-      num = 10 - (arraySum % 10)
-      // 最後のカードが6以上の場合、1個前からやり直し
-      if(num > 5){
-        arraySum = arraySum - (array[i][j] || 0) - array[i][j-1]
-        j = 8
+const createCards = () => {
+  // カード配列の作成
+  let arraySum = 0
+
+  for(let i = 0; i < areaLength.value; i++){
+    array[i] = []
+    for(let j = 0; j < areaLength.value; j++){
+      let num
+      // 最後のカードは「10 - 合計値を10で割ったあまり」で算出
+      if(i === areaLength.value - 1 && j === areaLength.value - 1) {
+        num = 10 - (arraySum % 10)
+        // 最後のカードが6以上の場合、1個前からやり直し
+        if(num > 5){
+          arraySum = arraySum - (array[i][j] || 0) - array[i][j-1]
+          j = 8
+        }
+      } else {
+        // 1以上5以下の数値を各カードに設定
+        num = Math.floor((Math.random(10) * 5) + 1)
       }
-    } else {
-      // 1以上5以下の数値を各カードに設定
-      num = Math.floor((Math.random(10) * 5) + 1)
-    }
-    array[i][j] = num
+      array[i][j] = num
 
-    // 最後のカード算出のため合計値を更新
-    arraySum += num
+      // 最後のカード算出のため合計値を更新
+      arraySum += num
+    }
   }
+  console.log('全カードの合計 :>> ', arraySum);
 }
-console.log('全カードの合計 :>> ', arraySum);
+
 
 const state = reactive({
   array,
@@ -315,7 +318,7 @@ const before_game_countdown = ref(3)
 
 const gameStart = () => {
   // ゲームのリセット処理
-  // TODO: ゲーム開始時に画面をTOPに戻したい
+  createCards()
   erased.value = 0
   limit_time.value = max_time
   // 残り時間
