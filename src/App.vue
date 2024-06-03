@@ -380,6 +380,7 @@ const gameTimer = () => {
       remaining_time_ref.value = remaining_time.toFixed(after_dp)
       if (remaining_time <= 0 || erased.value === 100) {
         // タイムアップ or 全消し時の処理
+        remaining_time = remaining_time.toFixed(after_dp)
         clearInterval(timerAction);
         remaining_time_ref.value = "0.00"
         document.getElementById('rect').style.display = 'none'
@@ -390,7 +391,7 @@ const gameTimer = () => {
         }
 
         // DBにレコード追加
-        addRecord(user_name.value, erased.value, remaining_time)
+        addRecord(user_name.value, erased.value, clear_time)
         console.log('スコア登録完了 :>>\nuser_name: ', user_name.value, '\nscore: ', erased.value, '\nクリアタイム: ', clear_time);
 
         // ローカルの最高記録更新
