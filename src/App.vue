@@ -329,6 +329,9 @@ const gameStart = () => {
   document.addEventListener('mouseup', dragEnd)
   document.addEventListener('touchend', dragEnd)
 
+  // ゲーム開始時に画面上部へ強制スクロール
+  window.scroll({ top: 0, behavior: 'smooth'})
+
   // ゲーム開始前のカウントダウン
   isCounting.value = true
   const countdown_interval = setInterval(() => {
