@@ -525,6 +525,12 @@ const changeRanking = async (term) => {
       </table>
     </div>
   </div>
+
+  <hr />
+
+  <a href="https://github.com/YutakaNagai/drag10" target="_blank">
+    <img width="50rem" src="./assets/github-mark.svg" />
+  </a>
 </template>
 
 <style scoped>
