@@ -2,6 +2,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { supabase } from './supabase'
 import CONST from './utils/consts'
+import Footer from "./components/Footer.vue";
 
 const createAudio = async (src, isLoop) => {
   const audioContext = new AudioContext();
@@ -590,9 +591,7 @@ const controlSound = (sound, soundFlag, action) => {
 
   <hr />
 
-  <a href="https://github.com/YutakaNagai/drag10" target="_blank">
-    <img width="50rem" src="./assets/github-mark.svg" />
-  </a>
+  <Footer />
 </template>
 
 <style scoped>
