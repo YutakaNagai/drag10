@@ -3,6 +3,21 @@ import { ref, reactive, onMounted } from 'vue'
 import { supabase } from './supabase'
 import CONST from './utils/consts'
 
+const createAudio = async (src, isLoop) => {
+  const audioContext = new AudioContext();
+  const response = await fetch(src);
+  const arrayBuffer = await response.arrayBuffer();
+  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+  const audio = audioContext.createBufferSource();
+  audio.buffer = audioBuffer;
+  audio.loop = isLoop;
+  audio.connect(audioContext.destination);
+
+  return audio;
+}
+
+let soundFlag = ref('オフ')
+
 let user_name = ref('')
 
 const changeName = (event) => {
@@ -196,7 +211,7 @@ const isInclude = () => {
 }
 
 // ドラッグイベント終了
-const dragEnd = (e) => {
+const dragEnd = async (e) => {
   if (isGaming.value) {
     let sum = 0
 
@@ -207,11 +222,21 @@ const dragEnd = (e) => {
     }
 
     if(sum === 10) {
+      // カードの削除音
+      const eraseSound = await createAudio("/src/assets/カードをめくる.mp3", false)
+      controlSound(eraseSound, soundFlag.value, 'start')
+
       for(let i = 0; i < selectedCards.length; i++){
         const card = selectedCards[i]
         card.style.opacity = "0"
       }
       erased.value += selectedCards.length
+
+      if (selectedCards.length > 2) {
+        // カードの削除音
+        const bonusSound = await createAudio("/src/assets/決定ボタンを押す46.mp3", false)
+        controlSound(bonusSound, soundFlag.value, 'start')
+      }
 
       // 一度に消した枚数 - 2 をボーナスとしてスコアに加算
       bonus.value = (selectedCards.length - 2).toFixed(2)
@@ -323,7 +348,14 @@ onMounted(() => {
 const isCounting = ref(false)
 const before_game_countdown = ref(3)
 
-const gameStart = () => {
+// ゲーム終了時にストップするため、ゲーム中のチクタク音を関数外で定義
+let timerSound
+
+const gameStart = async () => {
+  // ゲーム開始前のビープ音
+  const countdownSound = await createAudio("/src/assets/カウントダウン電子音.mp3", false)
+  controlSound(countdownSound, soundFlag.value, 'start')
+
   // ゲームのリセット処理
   createCards()
   erased.value = 0
@@ -343,9 +375,10 @@ const gameStart = () => {
   // ゲーム開始時に画面上部へ強制スクロール
   window.scroll({ top: 0, behavior: 'smooth'})
 
+
   // ゲーム開始前のカウントダウン
   isCounting.value = true
-  const countdown_interval = setInterval(() => {
+  const countdown_interval = setInterval(async () => {
     before_game_countdown.value = Number(before_game_countdown.value) - 1
     if(before_game_countdown.value === 0) {
       clearInterval(countdown_interval);
@@ -353,6 +386,10 @@ const gameStart = () => {
       gameTimer()
       before_game_countdown.value = 3
       isCounting.value = false
+
+      // ゲーム中のチクタク音
+      timerSound = await createAudio("/src/assets/制限時間タイマー.mp3", true)
+      controlSound(timerSound, soundFlag.value, 'start')
     }
   }, 1000);
 }
@@ -395,6 +432,9 @@ const gameTimer = () => {
         remaining_time_ref.value = "0.00"
         document.getElementById('rect').style.display = 'none'
 
+        // ゲーム中のチクタク音の停止
+        controlSound(timerSound, soundFlag.value, 'stop')
+
         let clear_time = null
         if (erased.value === 100) {
           clear_time = remaining_time
@@ -424,10 +464,32 @@ const changeRanking = async (term) => {
   getRecords()
 }
 
+// サウンドオンオフ対応
+const controlSound = (sound, soundFlag, action) => {
+  if (soundFlag === 'オン') {
+    if (action === 'start') {
+      sound.start()
+    } else if (action === 'stop') {
+      sound.stop()
+    }
+  }
+}
 </script>
 
 <template>
   <span>合計で10になるカードを囲んで消すゲーム</span>
+
+  <div>Sound:
+    <span v-if="isCounting || isGaming"> {{ soundFlag }}</span>
+    <template v-else>
+      <input type="radio" id="on" value="オン" v-model="soundFlag" />
+      <label for="on">オン</label>
+
+      <input type="radio" id="off" value="オフ" v-model="soundFlag" />
+      <label for="off">オフ</label>
+    </template>
+  </div>
+
   <div class="bg_card">
     <div class="name_block">
       <span class="user_name">名前: {{ user_name }}</span>　
