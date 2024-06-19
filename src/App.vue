@@ -283,7 +283,7 @@ const createCards = () => {
   console.log('10で割った際の余り :>> ', surplus);
 
   // 合計が10で割り切れない場合、ランダムなカードの値を剰余数分小さくする
-  if (surplus > 1) {
+  if (surplus > 0) {
     while(surplus !== 0) {
       let rand_i = Math.floor((Math.random() * 10))
       let rand_j = Math.floor((Math.random() * 10))
