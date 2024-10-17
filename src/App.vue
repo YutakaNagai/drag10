@@ -323,20 +323,13 @@ onMounted(() => {
   const outerDom = outerRef.value;
   const outerRect = outerDom.getBoundingClientRect();
 
-  // 画面の縦横を取得
+  // 画面の横幅を取得
   const displayWidthPx = window.innerWidth;
-  const displayHeightPx = window.innerHeight;
 
   let cardSizeRate;
-  if (displayWidthPx < displayHeightPx) {
-    // 画面が縦長の場合
-    const sizePx = outerRect.width / (areaLength.value + 1);
-    cardSizeRate = sizePx / displayWidthPx;
-  } else {
-    // 画面が横長の場合
-    const sizePx = (outerRect.height * 10) / (areaLength.value + 1);
-    cardSizeRate = sizePx / displayHeightPx;
-  }
+
+  const sizePx = outerRect.width / (areaLength.value + 1);
+  cardSizeRate = sizePx / displayWidthPx;
 
   // 算出したカードサイズをsvhに修正してrefに設定
   size.value = ref(cardSizeRate * 100);
@@ -693,6 +686,7 @@ progress {
 
 .score_icon {
   width: 3rem;
+  height: 3rem;
   vertical-align: middle;
 }
 
@@ -713,18 +707,19 @@ progress {
 
 .text_block {
   display: flex;
+  justify-content: space-evenly;
   height: 10vh;
   width: 80svw;
   margin: 0 auto;
 }
 
 .erase_block {
-  margin: 0 1%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   width: 50%;
   height: 3.5rem;
   border: 0.2rem dashed #c2ffbd;
-  line-height: 3.5rem;
-  text-align: left;
 }
 .erase_text {
   margin: auto 1svw;
@@ -736,12 +731,12 @@ progress {
 }
 
 .score_block {
-  margin: 0 1%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   width: 40%;
   height: 3.5rem;
   border: 0.2rem dashed #c2ffbd;
-  line-height: 3.5rem;
-  justify-content: flex-start;
 }
 
 .score_text {
