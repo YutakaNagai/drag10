@@ -6,11 +6,6 @@ import Footer from "./components/Footer.vue";
 
 let user_name = ref("");
 
-const state = reactive({
-  array: [],
-  records: [],
-});
-
 const changeName = (event) => {
   user_name.value = `${
     CONST.name1[Math.floor(Math.random() * CONST.name1.length)]
@@ -79,8 +74,6 @@ const getRecords = async () => {
   const endDateJst = new Date(today.getTime() + oneDayMsJst);
   endDate = `${formatDate(endDate)}`;
 
-  state.terms = `${formatDate(startDateJst)} ~ ${formatDate(endDateJst)}`;
-
   let { data, error, status } = await supabase
     .from("surround_card_scores")
     .select("user_name, score, created_at, clear_time")
@@ -92,6 +85,7 @@ const getRecords = async () => {
     .order("created_at", { ascending: false })
     .limit(10);
   state.records = data;
+  state.terms = `${formatDate(startDateJst)} ~ ${formatDate(endDateJst)}`;
 };
 
 // 画面表示時のランキング期間
@@ -302,6 +296,11 @@ const createCards = () => {
   }
   console.log("最終的な全カードの合計 :>> ", arraySum);
 };
+
+const state = reactive({
+  array,
+  records: [],
+});
 
 const size = ref(0);
 const outerRef = ref(null);
