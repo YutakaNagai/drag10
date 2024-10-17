@@ -86,6 +86,7 @@ const getRecords = async () => {
     .select("user_name, score, created_at, clear_time")
     .gte("created_at", startDate)
     .lte("created_at", endDate)
+    .neq("is_delete", true)
     .order("score", { ascending: false })
     .order("clear_time", { ascending: false })
     .order("created_at", { ascending: false })
