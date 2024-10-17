@@ -6,6 +6,11 @@ import Footer from "./components/Footer.vue";
 
 let user_name = ref("");
 
+const state = reactive({
+  array: [],
+  records: [],
+});
+
 const changeName = (event) => {
   user_name.value = `${
     CONST.name1[Math.floor(Math.random() * CONST.name1.length)]
@@ -25,44 +30,56 @@ const getRecords = async () => {
     const year = date.getUTCFullYear();
     const month = date.getUTCMonth() + 1;
     const day = date.getUTCDate();
+    const hour = date.getUTCHours();
+    const minutes = date.getUTCMinutes();
+    const Seconds = date.getUTCSeconds();
     const dateStr =
       year +
       "-" +
       String(month).padStart(2, "0") +
       "-" +
-      String(day).padStart(2, "0");
+      String(day).padStart(2, "0") +
+      " " +
+      String(hour).padStart(2, "0") +
+      ":" +
+      String(minutes).padStart(2, "0") +
+      ":" +
+      String(Seconds).padStart(2, "0");
     return dateStr;
   };
 
   const today = new Date();
+  const oneDayMs = 1000 * 60 * 60 * 24;
+  const oneDayMsJst = 1000 * 60 * 60 * 9;
 
   let startDate;
-  let endDate = `${formatDate(today)} 14:59:59`;
+  let startDateJst;
 
   if (ranking_term.value === "daily") {
     // デイリーランキング
-    const yesterday = new Date(today.getTime());
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    startDate = formatDate(yesterday);
+    startDate = new Date(today.getTime() - oneDayMs);
+    startDateJst = new Date(today.getTime() - oneDayMs + oneDayMsJst);
   } else if (ranking_term.value === "weekly") {
     // ウィークリーランキング
-    const lastWeek = new Date(today.getTime());
-    lastWeek.setDate(lastWeek.getDate() - 7);
-
-    startDate = formatDate(lastWeek);
+    startDate = new Date(today.getTime() - oneDayMs * 7);
+    startDateJst = new Date(today.getTime() - oneDayMs * 7 + oneDayMsJst);
   } else if (ranking_term.value === "monthly") {
     // マンスリーランキング
-    const month = new Date(today.getTime());
-    month.setMonth(month.getMonth() - 1);
-
-    startDate = formatDate(month);
+    startDate = new Date(today.getTime() - oneDayMs * 30);
+    startDateJst = new Date(today.getTime() - oneDayMs * 30 + oneDayMsJst);
   } else {
     // トータルランキング
-    startDate = formatDate(new Date(0));
+    startDate = new Date(0);
+    startDateJst = new Date(0 + oneDayMsJst);
   }
 
-  startDate += " 15:00:00";
+  startDate = `${formatDate(startDate)}`;
+
+  let endDate = new Date(today.getTime());
+  const endDateJst = new Date(today.getTime() + oneDayMsJst);
+  endDate = `${formatDate(endDate)}`;
+
+  state.terms = `${formatDate(startDateJst)} ~ ${formatDate(endDateJst)}`;
 
   let { data, error, status } = await supabase
     .from("surround_card_scores")
@@ -284,11 +301,6 @@ const createCards = () => {
   }
   console.log("最終的な全カードの合計 :>> ", arraySum);
 };
-
-const state = reactive({
-  array,
-  records: [],
-});
 
 const size = ref(0);
 const outerRef = ref(null);
@@ -543,12 +555,17 @@ const changeRanking = async (term) => {
       <span
         :class="ranking_term === 'daily' ? 'now_ranking' : ''"
         @click="changeRanking('daily')"
-        >今日</span
+        >24時間</span
       >
       <span
         :class="ranking_term === 'weekly' ? 'now_ranking' : ''"
         @click="changeRanking('weekly')"
-        >今週</span
+        >7日間</span
+      >
+      <span
+        :class="ranking_term === 'monthly' ? 'now_ranking' : ''"
+        @click="changeRanking('monthly')"
+        >30日間</span
       >
       <span
         :class="ranking_term === 'total' ? 'now_ranking' : ''"
@@ -556,6 +573,7 @@ const changeRanking = async (term) => {
         >全期間</span
       >
     </div>
+    <div class="terms">{{ state.terms }}</div>
     <div class="ranking">
       <table>
         <tr>
@@ -797,6 +815,11 @@ progress {
   color: #f5a500;
   font-weight: bold;
   border-bottom: double #f5a500;
+}
+
+.terms {
+  font-size: small;
+  padding: 10px;
 }
 
 div#rect {
