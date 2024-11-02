@@ -325,11 +325,25 @@ onMounted(() => {
 
   // 画面の横幅を取得
   const displayWidthPx = window.innerWidth;
+  const displayHeightPx = window.innerHeight;
 
-  let cardSizeRate;
+  let resizedOuterWidth;
 
-  const sizePx = outerRect.width / (areaLength.value + 1);
-  cardSizeRate = sizePx / displayWidthPx;
+  if (displayWidthPx > displayHeightPx) {
+    // 画面が横長の場合、outerの下部まで画面内に収まるようにする
+    const newOuterSize = (displayHeightPx - outerRect.top) * 0.9;
+    // outer自体のサイズも変更する
+    outerDom.style.width = `${newOuterSize}px`;
+    outerDom.style.height = `${newOuterSize}px`;
+    resizedOuterWidth = newOuterSize;
+  } else {
+    // 縦長の場合、元のouterのサイズを使用する
+    resizedOuterWidth = outerRect.width;
+  }
+  const sizePx = resizedOuterWidth / (areaLength.value + 1);
+  const cardSizeRate = sizePx / displayWidthPx;
+
+  console.log("cardSizeRate :>> ", cardSizeRate);
 
   // 算出したカードサイズをsvhに修正してrefに設定
   size.value = ref(cardSizeRate * 100);
@@ -513,14 +527,16 @@ const changeRanking = async (term) => {
       <template v-else>
         <!-- ドラッグ時の矩形 -->
         <div id="rect"></div>
-        <div v-for="(iValue, i) in state.array" :key="i">
+        <div
+          v-for="(iValue, i) in state.array"
+          :key="i"
+          class="number_card_column"
+        >
           <div
             v-for="(jValue, j) in state.array[i]"
             :key="j"
+            class="number_card_wrapper"
             :style="`
-              display: inline-block;
-              left: ${size.value * j}svw;
-              top: ${size.value * i}svw;
               width: ${size.value}svw;
               height: ${size.value}svw;`"
           >
@@ -668,11 +684,12 @@ progress {
 }
 
 .outer {
-  /* border: 0.2rem solid burlywood; */
-  width: 80svw;
-  height: 80svw;
   margin: 0 auto;
   display: flex;
+  justify-content: space-between;
+  width: 100%;
+  aspect-ratio: 1/1;
+  align-items: center;
 }
 
 .before_game {
@@ -690,10 +707,18 @@ progress {
   vertical-align: middle;
 }
 
+.number_card_column {
+  display: flex;
+  flex-flow: column;
+  /* justify-content: space-between; */
+  align-items: center;
+}
+
 .number_card {
   position: relative;
   display: flex;
   justify-content: center;
+  align-items: center;
   border-radius: 10%;
   background: #ffffff;
   top: 15%;
@@ -709,7 +734,6 @@ progress {
   display: flex;
   justify-content: space-evenly;
   height: 10vh;
-  width: 80svw;
   margin: 0 auto;
 }
 
