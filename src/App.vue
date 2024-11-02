@@ -194,7 +194,7 @@ const isInclude = () => {
     const cardRect = card.getBoundingClientRect();
 
     // 前回の選択内容を削除
-    card.classList.remove("selected");
+    card.classList.remove("--selected");
 
     // ドラッグの矩形内にカードが含まれているか判定
     if (
@@ -205,7 +205,7 @@ const isInclude = () => {
       card.style.opacity !== "0"
     ) {
       console.log("card", i, " is include :>> ");
-      card.classList.add("selected");
+      card.classList.add("--selected");
     }
   }
 };
@@ -215,7 +215,7 @@ const dragEnd = (e) => {
   if (isGaming.value) {
     let sum = 0;
 
-    const selectedCards = document.getElementsByClassName("selected");
+    const selectedCards = document.getElementsByClassName("--selected");
 
     for (let i = 0; i < selectedCards.length; i++) {
       sum += Number(selectedCards[i].textContent);
@@ -224,7 +224,8 @@ const dragEnd = (e) => {
     if (sum === 10) {
       for (let i = 0; i < selectedCards.length; i++) {
         const card = selectedCards[i];
-        card.style.opacity = "0";
+        card.classList.add("--hidden");
+        // card.style.opacity = "0";
       }
       erased.value += selectedCards.length;
 
@@ -697,8 +698,21 @@ progress {
 }
 
 .before_game_countdown {
+  align-content: center;
   color: #cc3030;
   font-size: 10rem;
+  animation: countdown 1s ease-out infinite;
+}
+
+@keyframes countdown {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(2);
+  }
 }
 
 .score_icon {
@@ -726,8 +740,37 @@ progress {
   margin: auto;
 }
 
-.selected {
+.--selected {
   background: #f7c6bd;
+  animation: poyopoyo 2s ease-out infinite;
+}
+
+@keyframes poyopoyo {
+  0%,
+  40%,
+  60%,
+  80% {
+    transform: scale(1);
+  }
+  50%,
+  70% {
+    transform: scale(0.8);
+  }
+}
+
+.--hidden {
+  animation: fuwakie 0.3s ease-out forwards;
+}
+
+@keyframes fuwakie {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0);
+  }
 }
 
 .text_block {
