@@ -202,7 +202,7 @@ const isInclude = () => {
       cardRect.left + cardRect.width < rect.left + rect.width &&
       cardRect.top > rect.top &&
       cardRect.top + cardRect.height < rect.top + rect.height &&
-      card.style.opacity !== "0"
+      !card.classList.contains("--hidden")
     ) {
       console.log("card", i, " is include :>> ");
       card.classList.add("--selected");
