@@ -754,22 +754,22 @@ progress {
   }
   50%,
   70% {
-    transform: scale(0.8);
+    transform: scale(1.3);
   }
 }
 
 .--hidden {
-  animation: fuwakie 0.3s ease-out forwards;
+  animation: fuwakie 0.5s ease-out forwards;
 }
 
 @keyframes fuwakie {
   0% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) rotate(0deg);
   }
   100% {
     opacity: 0;
-    transform: scale(0);
+    transform: scale(0) rotate(720deg);
   }
 }
 
